@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@theme {
+  /* Threads Colors from design.md */
+  --color-ink-black: #000000;
+  --color-paper-white: #fafafa;
+  --color-mist-gray: #efefef;
+  --color-cloud-gray: #d5d5d5;
+  --color-ash-gray: #969696;
+  --color-graphite: #424242;
+  --color-meta-blue: #385898;
+
+  /* Typography */
+  --font-system-ui: 'system-ui', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'system-ui', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+@layer base {
+  :root {
+    --color-ink-black: #000000;
+    --color-paper-white: #fafafa;
+    --color-mist-gray: #efefef;
+    --color-cloud-gray: #d5d5d5;
+    --color-ash-gray: #969696;
+    --color-graphite: #424242;
+    --color-meta-blue: #385898;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #fafafa;
+    color: #000000;
+  }
+
+  body {
+    background-color: #fafafa;
+    color: #000000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, .font-heading {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  ::selection {
+    background-color: #ffd731;
+    color: #000000;
+  }
+
+  /* Slush Scrollbar: Clean black thumb on paper */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #e9e9e9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #000000;
+    border-radius: 9999px;
+  }
+}
+
+/* Animations */
+@keyframes stampIn {
+  0% {
+    opacity: 0;
+    transform: scale(2.4) rotate(-16deg);
+  }
+  70% {
+    opacity: 0.95;
+    transform: scale(0.96) rotate(-5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-7deg);
+  }
+}
+
+.animate-stamp {
+  animation: stampIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out forwards;
+}
