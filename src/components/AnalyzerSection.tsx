@@ -282,7 +282,7 @@ export function AnalyzerSection({
                 }`}
                 title="Выбрать готовый скандал бренда"
               >
-                <Sparkles className="w-4 h-4 text-[#385898] shrink-0" />
+                <Sparkles className="w-4 h-4 text-[#000000] shrink-0" />
                 <span className="hidden sm:inline whitespace-nowrap">Готовые кейсы</span>
                 {showPresetsMenu ? <ChevronUp className="w-3 h-3 shrink-0" /> : <ChevronDown className="w-3 h-3 shrink-0" />}
               </button>
@@ -324,9 +324,9 @@ export function AnalyzerSection({
 
           {/* Dedicated loading status row */}
           {isLoading && (
-            <div className="mt-3 pt-2.5 border-t border-[#efefef] flex items-center gap-2 text-xs font-medium text-[#385898] animate-fade-in">
-              <Sparkles className="w-3.5 h-3.5 shrink-0 animate-spin text-[#385898]" />
-              <span className="truncate">{LOADING_MESSAGES[loadingMsgIdx]}</span>
+            <div className="mt-3 pt-2.5 border-t border-[#efefef] flex items-center gap-2 text-xs font-medium text-[#000000] animate-fade-in">
+              <Sparkles className="w-3.5 h-3.5 shrink-0 animate-spin text-[#000000]" />
+              <span className="truncate text-[#000000]">{LOADING_MESSAGES[loadingMsgIdx]}</span>
             </div>
           )}
 
