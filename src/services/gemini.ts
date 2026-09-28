@@ -20,65 +20,40 @@ export function saveApiKey(key: string): void {
   }
 }
 
-// Prioritized fast multimodal models in Google AI Studio
-const FAST_MODELS = [
-  'gemini-3.5-flash-lite',
-  'gemini-3.5-flash',
-  'gemini-3.0-flash',
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash'
-];
-
-let cachedWorkingModel: string = localStorage.getItem('offended_ai_working_model') || '';
-let cachedDiscoveredModels: string[] | null = null;
-
-// Dynamic query to find all supported models for this specific API key
-async function getDynamicModels(apiKey: string): Promise<string[]> {
-  if (cachedDiscoveredModels && cachedDiscoveredModels.length > 0) {
-    return cachedDiscoveredModels;
-  }
+// Fetch the real list of available models for this specific API key
+async function getSupportedModels(apiKey: string): Promise<string[]> {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`);
     if (res.ok) {
       const data = await res.json();
       const models: Array<{ name: string; supportedGenerationMethods?: string[] }> = data.models || [];
+      
       const contentModels = models
         .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
-        .map(m => m.name.replace('models/', ''))
-        .filter(m => !m.includes('embedding') && !m.includes('aqa') && !m.includes('imagen') && !m.includes('legacy'));
+        .map(m => m.name.replace('models/', ''));
 
+      // Sort priority: flash / flash-lite first, then pro, avoid embedding/imagen
       contentModels.sort((a, b) => {
         const getScore = (name: string) => {
-          let score = 0;
-          if (name.includes('3.5')) score += 100;
-          else if (name.includes('3.0')) score += 80;
-          else if (name.includes('2.5')) score += 60;
-          else if (name.includes('2.0')) score += 40;
-          else if (name.includes('1.5')) score += 20;
-
-          if (name.includes('flash-lite')) score += 15;
-          else if (name.includes('flash')) score += 10;
-          else if (name.includes('pro')) score += 2;
-          return score;
+          if (name.includes('flash-lite')) return 3;
+          if (name.includes('flash')) return 2;
+          if (name.includes('pro')) return 1;
+          return 0;
         };
         return getScore(b) - getScore(a);
       });
 
       if (contentModels.length > 0) {
-        cachedDiscoveredModels = contentModels;
+        console.log('Discovered supported Gemini models:', contentModels);
         return contentModels;
       }
     }
   } catch (e) {
     console.warn('Failed to dynamically query models:', e);
   }
-  return FAST_MODELS;
+
+  // Fallback defaults
+  return ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro'];
 }
 
 export async function analyzeAdWithGemini(
@@ -125,52 +100,26 @@ export async function analyzeAdWithGemini(
       }
     ],
     generationConfig: {
-      temperature: 0.9,
-      maxOutputTokens: 1024,
+      temperature: 0.95,
       responseMimeType: 'application/json'
     }
   };
 
-  // Build candidate models:
-  // 1. If we already know the working model from previous success, try it first!
-  const candidateModels: string[] = [];
-  if (cachedWorkingModel) {
-    candidateModels.push(cachedWorkingModel);
-  } else {
-    // On the first run, discover the exact models supported by this API key
-    const dynamic = await getDynamicModels(apiKey);
-    for (const m of dynamic) {
-      if (!candidateModels.includes(m)) {
-        candidateModels.push(m);
-      }
-    }
-  }
-
-  // Also append FAST_MODELS as backup
-  for (const m of FAST_MODELS) {
-    if (!candidateModels.includes(m)) {
-      candidateModels.push(m);
-    }
-  }
-
+  // Get models dynamically registered in this user's Google AI Studio project
+  const candidateModels = await getSupportedModels(apiKey);
   let lastErrorMsg = '';
 
   for (const model of candidateModels) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
-
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload),
-        signal: controller.signal
+        body: JSON.stringify(payload)
       });
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errData = await response.json().catch(() => null);
@@ -207,8 +156,6 @@ export async function analyzeAdWithGemini(
         continue;
       }
 
-      cachedWorkingModel = model;
-      localStorage.setItem('offended_ai_working_model', model);
       return parsed as OffenseAnalysis;
     } catch (err: any) {
       if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('строго запрещена') || err.message?.includes('строго запрещены') || err.message?.includes('отклонён модерацией')) {
@@ -216,32 +163,6 @@ export async function analyzeAdWithGemini(
       }
       lastErrorMsg = err.message || 'Ошибка сети';
       console.warn(`Error on model ${model}:`, err);
-      continue;
-    }
-  }
-
-  // Fallback: try dynamic query if fast models were exhausted
-  const dynamicModels = await getDynamicModels(apiKey);
-  for (const model of dynamicModels) {
-    if (candidateModels.includes(model)) continue;
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) continue;
-      const result = await response.json();
-      const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) continue;
-      const cleaned = rawText.replace(/```json\s*/g, '').replace(/```\s*$/g, '').trim();
-      const parsed: any = JSON.parse(cleaned);
-      if (parsed.brandOrTitle && parsed.toxicityScore) {
-        cachedWorkingModel = model;
-        return parsed as OffenseAnalysis;
-      }
-    } catch {
       continue;
     }
   }
