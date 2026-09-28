@@ -69,13 +69,17 @@ export function HeroSection({
         {/* Mini Preview Card of a Threads Post */}
         <div className="w-full rounded-[18px] bg-[#ffffff] border border-[#efefef] p-4 text-left shadow-[0_0_12px_rgba(0,0,0,0.04)]">
           <div className="flex items-center gap-3 mb-2.5">
-            <div className="w-9 h-9 rounded-full bg-[#000000] text-[#fafafa] flex items-center justify-center text-xs font-semibold">
-              👁️
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#efefef] border border-[#d5d5d5] shrink-0">
+              <img 
+                src="https://api.dicebear.com/7.x/notionists/svg?seed=inspector" 
+                alt="Инспектор" 
+                className="w-full h-full object-cover" 
+              />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-semibold text-[14px] text-[#000000]">
-                  Главный Морализатор
+                  Инспектор микроагрессий
                 </span>
                 <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#385898] text-[#fafafa]">
                   <svg viewBox="0 0 16 16" className="w-2 h-2 fill-current">
@@ -83,7 +87,7 @@ export function HeroSection({
                   </svg>
                 </span>
               </div>
-              <span className="text-[12px] text-[#969696]">@moral_watchdog • только что</span>
+              <span className="text-[12px] text-[#969696]">@cringe_inspector • только что</span>
             </div>
           </div>
           <p className="text-[14px] text-[#000000] leading-snug">

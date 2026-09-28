@@ -20,6 +20,64 @@ interface CancelCardProps {
   onReset: () => void;
 }
 
+const DIVERSE_FALLBACK_PERSONAS = [
+  { handle: 'urban_drama', name: 'Осознанный урбанист' },
+  { handle: 'kerning_police', name: 'Защитница шрифтов' },
+  { handle: 'eco_fury', name: 'Веган на электросамокате' },
+  { handle: 'burnout_senior', name: 'Senior Душнила' },
+  { handle: 'cringe_hunter', name: 'Инспектор микроагрессий' },
+  { handle: 'drain_zoomer', name: 'Травмированный зумер' },
+  { handle: 'avocado_snob', name: 'Эстетический критик' },
+  { handle: 'toxic_positivity', name: 'Коуч по выгоранию' },
+  { handle: 'threads_tribunal', name: 'Палата нравов' },
+  { handle: 'gaslight_detector', name: 'Психотерапевт из Твиттера' },
+  { handle: 'minimalism_victim', name: 'Жертва редизайна' },
+  { handle: 'prana_warrior', name: 'Адепт осознанности' },
+  { handle: 'kpi_destroyer', name: 'Бывший директор по счастью' },
+  { handle: 'gluten_intolerant', name: 'Безглютеновый борец' }
+];
+
+function resolveAuthorIdentity(analysis: OffenseAnalysis) {
+  let rawHandle = (analysis.fakeTweet?.handle || '').replace(/^@/, '').trim();
+  let rawName = (analysis.fakeTweet?.author || '').trim();
+  let rawAvatar = (analysis.fakeTweet?.avatar || '').trim();
+
+  // If handle is missing, default, or the old repeated moral_watchdog
+  if (!rawHandle || rawHandle.toLowerCase() === 'moral_watchdog') {
+    const seedStr = (analysis.brandOrTitle || 'persona') + (analysis.outrageSummary || '');
+    let hash = 0;
+    for (let i = 0; i < seedStr.length; i++) {
+      hash = (hash << 5) - hash + seedStr.charCodeAt(i);
+      hash |= 0;
+    }
+    const persona = DIVERSE_FALLBACK_PERSONAS[Math.abs(hash) % DIVERSE_FALLBACK_PERSONAS.length];
+    rawHandle = persona.handle;
+    if (!rawName || rawName.toLowerCase() === 'палата нравов' || rawName.toLowerCase() === 'ник автора треда') {
+      rawName = persona.name;
+    }
+  }
+
+  if (!rawName || rawName.toLowerCase() === 'ник автора треда') {
+    rawName = 'Палата нравов';
+  }
+
+  // Diverse avatar styles: notionists (minimalist hand-drawn), lorelei (modern character), avataaars (classic cartoon)
+  const avatarStyles = ['notionists', 'lorelei', 'avataaars'];
+  let seedNum = 0;
+  for (let i = 0; i < rawHandle.length; i++) {
+    seedNum = (seedNum << 5) - seedNum + rawHandle.charCodeAt(i);
+    seedNum |= 0;
+  }
+  const chosenStyle = avatarStyles[Math.abs(seedNum) % avatarStyles.length];
+
+  // If avatar is missing, or is the old robot bottts with seed=offended
+  if (!rawAvatar || rawAvatar.includes('bottts') || rawAvatar.includes('seed=offended')) {
+    rawAvatar = `https://api.dicebear.com/7.x/${chosenStyle}/svg?seed=${encodeURIComponent(rawHandle)}`;
+  }
+
+  return { authorHandle: rawHandle, authorName: rawName, authorAvatar: rawAvatar };
+}
+
 export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
@@ -29,6 +87,8 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
     const raw = analysis.fakeTweet?.likes || '142K';
     return raw;
   });
+
+  const { authorName, authorHandle, authorAvatar } = resolveAuthorIdentity(analysis);
 
   const handleLikeToggle = () => {
     if (!liked) {
@@ -50,7 +110,6 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
     if (!cardRef.current) return;
     try {
       setDownloading(true);
-
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 2,
         backgroundColor: '#fafafa',
@@ -80,11 +139,6 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
       console.error('Failed to copy', err);
     }
   };
-
-  // Author identity for the fake Threads post
-  const authorName = analysis.fakeTweet?.author || 'Палата нравов';
-  const authorHandle = (analysis.fakeTweet?.handle || '@moral_watchdog').replace(/^@/, '');
-  const authorAvatar = analysis.fakeTweet?.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${authorHandle}`;
 
   return (
     <div className="w-full max-w-[640px] mx-auto my-4 flex flex-col gap-4 animate-fade-in text-[#000000]">

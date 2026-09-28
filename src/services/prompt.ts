@@ -63,10 +63,10 @@ export const SYSTEM_PROMPT = `
     }
   ],
   "fakeTweet": {
-    "author": "Ник автора треда",
-    "handle": "@moral_watchdog",
+    "author": "Уникальное сатирическое имя/статус автора треда под тему отмены (например: 'Осознанный урбанист', 'Защитница шрифтов', 'Senior Душнила', 'Травмированный зумер', 'Веган на самокате', 'Коуч по выгоранию', 'Адепт осознанности', 'Инспектор микроагрессий', 'Психотерапевт из Threads' — каждый раз придумывай уникальное!)",
+    "handle": "@уникальный_английский_ник (например: @urban_drama, @eco_rage, @kerning_police, @avocado_snob, @cringe_hunter, @burnout_lead, @toxic_positivity, @gluten_free_hater — СТРОГО уникальный под тему, НИКОГДА не используй moral_watchdog!)",
     "verified": true,
-    "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=offended",
+    "avatar": "https://api.dicebear.com/7.x/notionists/svg?seed=любое_английское_слово_по_теме",
     "text": "Короткий мем-твит в 1-2 строки с сарказмом и призывом к отмене!",
     "retweets": "42K",
     "likes": "119K",
