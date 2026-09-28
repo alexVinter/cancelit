@@ -20,40 +20,31 @@ export function saveApiKey(key: string): void {
   }
 }
 
-// Fetch the real list of available models for this specific API key
-async function getSupportedModels(apiKey: string): Promise<string[]> {
+// Prioritized fast multimodal models in Google AI Studio
+const FAST_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+  'gemini-2.5-flash-lite'
+];
+
+let cachedWorkingModel: string | null = null;
+
+// Optional fallback to query all dynamically registered models if fast list fails
+async function getDynamicModels(apiKey: string): Promise<string[]> {
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`);
     if (res.ok) {
       const data = await res.json();
       const models: Array<{ name: string; supportedGenerationMethods?: string[] }> = data.models || [];
-      
-      const contentModels = models
+      return models
         .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
         .map(m => m.name.replace('models/', ''));
-
-      // Sort priority: flash / flash-lite first, then pro, avoid embedding/imagen
-      contentModels.sort((a, b) => {
-        const getScore = (name: string) => {
-          if (name.includes('flash-lite')) return 3;
-          if (name.includes('flash')) return 2;
-          if (name.includes('pro')) return 1;
-          return 0;
-        };
-        return getScore(b) - getScore(a);
-      });
-
-      if (contentModels.length > 0) {
-        console.log('Discovered supported Gemini models:', contentModels);
-        return contentModels;
-      }
     }
   } catch (e) {
     console.warn('Failed to dynamically query models:', e);
   }
-
-  // Fallback defaults
-  return ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro'];
+  return [];
 }
 
 export async function analyzeAdWithGemini(
@@ -100,13 +91,23 @@ export async function analyzeAdWithGemini(
       }
     ],
     generationConfig: {
-      temperature: 0.95,
+      temperature: 0.9,
+      maxOutputTokens: 1024,
       responseMimeType: 'application/json'
     }
   };
 
-  // Get models dynamically registered in this user's Google AI Studio project
-  const candidateModels = await getSupportedModels(apiKey);
+  // Build candidate models: cached working model first, then fast models
+  const candidateModels: string[] = [];
+  if (cachedWorkingModel) {
+    candidateModels.push(cachedWorkingModel);
+  }
+  for (const m of FAST_MODELS) {
+    if (!candidateModels.includes(m)) {
+      candidateModels.push(m);
+    }
+  }
+
   let lastErrorMsg = '';
 
   for (const model of candidateModels) {
@@ -156,6 +157,7 @@ export async function analyzeAdWithGemini(
         continue;
       }
 
+      cachedWorkingModel = model;
       return parsed as OffenseAnalysis;
     } catch (err: any) {
       if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('строго запрещена') || err.message?.includes('строго запрещены') || err.message?.includes('отклонён модерацией')) {
@@ -163,6 +165,32 @@ export async function analyzeAdWithGemini(
       }
       lastErrorMsg = err.message || 'Ошибка сети';
       console.warn(`Error on model ${model}:`, err);
+      continue;
+    }
+  }
+
+  // Fallback: try dynamic query if fast models were exhausted
+  const dynamicModels = await getDynamicModels(apiKey);
+  for (const model of dynamicModels) {
+    if (candidateModels.includes(model)) continue;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) continue;
+      const result = await response.json();
+      const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) continue;
+      const cleaned = rawText.replace(/```json\s*/g, '').replace(/```\s*$/g, '').trim();
+      const parsed: any = JSON.parse(cleaned);
+      if (parsed.brandOrTitle && parsed.toxicityScore) {
+        cachedWorkingModel = model;
+        return parsed as OffenseAnalysis;
+      }
+    } catch {
       continue;
     }
   }

@@ -106,13 +106,52 @@ export function AnalyzerSection({
     return () => window.removeEventListener('paste', handlePaste);
   }, []);
 
-  const handleFile = (file: File) => {
+  const compressImage = (file: File, maxDim = 1280, quality = 0.85): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          } else {
+            resolve(e.target?.result as string);
+          }
+        };
+        img.onerror = () => resolve(e.target?.result as string);
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      onImageChange(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file);
+      onImageChange(compressed);
+    } catch {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        onImageChange(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -266,7 +305,7 @@ export function AnalyzerSection({
             <button
               onClick={onSubmit}
               disabled={!isReadyToSubmit}
-              className={`cursor-pointer inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full text-[14px] font-semibold transition active:scale-95 shrink-0 whitespace-nowrap ${
+              className={`cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition active:scale-95 shrink-0 whitespace-nowrap min-w-[96px] ${
                 !isReadyToSubmit
                   ? 'bg-[#efefef] text-[#969696] cursor-not-allowed'
                   : 'bg-[#000000] text-[#fafafa] hover:bg-[#222222]'
@@ -274,14 +313,22 @@ export function AnalyzerSection({
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-[#fafafa] shrink-0" />
-                  <span className="text-xs whitespace-nowrap">{LOADING_MESSAGES[loadingMsgIdx]}</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#fafafa] shrink-0" />
+                  <span>Анализ...</span>
                 </>
               ) : (
                 <span>Проверить</span>
               )}
             </button>
           </div>
+
+          {/* Dedicated loading status row */}
+          {isLoading && (
+            <div className="mt-3 pt-2.5 border-t border-[#efefef] flex items-center gap-2 text-xs font-medium text-[#385898] animate-fade-in">
+              <Sparkles className="w-3.5 h-3.5 shrink-0 animate-spin text-[#385898]" />
+              <span className="truncate">{LOADING_MESSAGES[loadingMsgIdx]}</span>
+            </div>
+          )}
 
           {/* Expandable "Как это работает" Box */}
           {showHowItWorks && (
