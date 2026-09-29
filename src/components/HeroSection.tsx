@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Heart, MessageCircle, Repeat2, Send, MoreHorizontal } from 'lucide-react';
 import { LogoIcon } from './LogoIcon';
 import { VerifiedBadge } from './VerifiedBadge';
 
@@ -67,33 +67,77 @@ export function HeroSection({
           </button>
         </div>
 
-        {/* Mini Preview Card of a Threads Post */}
-        <div className="w-full rounded-[18px] bg-[#ffffff] border border-[#efefef] p-4 text-left shadow-[0_0_12px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center gap-3 mb-2.5">
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#efefef] border border-[#d5d5d5] shrink-0">
-              <img 
-                src="https://api.dicebear.com/7.x/notionists/svg?seed=inspector" 
-                alt="Инспектор" 
-                className="w-full h-full object-cover" 
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-[14px] text-[#000000]">
+        {/* Authentic Threads Post Card Preview */}
+        <div className="w-full rounded-[18px] bg-[#ffffff] border border-[#d5d5d5] p-4 sm:p-5 text-left shadow-[0_0_12px_rgba(0,0,0,0.04)]">
+          {/* Post Header */}
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-[#efefef] border border-[#d5d5d5] shrink-0 flex items-center justify-center">
+                <img 
+                  src="https://api.dicebear.com/7.x/notionists/svg?seed=inspector" 
+                  alt="Инспектор микроагрессий" 
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+
+              <div className="flex flex-col text-left">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-[15px] leading-tight text-[#000000]">
+                    cringe_inspector
+                  </span>
+                  <VerifiedBadge className="w-3.5 h-3.5 shrink-0" title="Подтверждённый аккаунт" />
+                  <span className="text-[13px] text-[#969696] font-normal">
+                    · только что
+                  </span>
+                </div>
+                <span className="text-[12px] text-[#969696] font-normal leading-none mt-0.5">
                   Инспектор микроагрессий
                 </span>
-                <VerifiedBadge className="w-3.5 h-3.5 shrink-0" title="Подтверждённый профиль" />
               </div>
-              <span className="text-[12px] text-[#969696]">@cringe_inspector • только что</span>
+            </div>
+
+            <div className="text-[#969696] p-1">
+              <MoreHorizontal className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-[14px] text-[#000000] leading-snug">
-            Ребят, вы серьёзно утвердили этот креатив в 2026 году? Опять обесценивание, лукизм и тонна токсичности. Давайте сразу отменим...
-          </p>
-          <div className="flex items-center gap-4 mt-3 text-[12px] text-[#969696] pt-2 border-t border-[#efefef]">
-            <span>❤️ 1.4K</span>
-            <span>💬 842</span>
-            <span>🔁 319</span>
+
+          {/* Post Content */}
+          <div className="mb-3 pl-0 sm:pl-[52px]">
+            <p className="text-[15px] leading-[1.4] text-[#000000] font-normal whitespace-pre-line text-left">
+              Ребят, вы серьёзно утвердили этот креатив в 2026 году? Опять обесценивание, лукизм и тонна токсичности. Давайте сразу отменим...
+            </p>
+          </div>
+
+          {/* Post Engagement Bar: 4 Line Icons + Counts + @Ущемись */}
+          <div className="pt-3 border-t border-[#efefef] flex items-center justify-between pl-0 sm:pl-[52px]">
+            <div className="flex items-center gap-4 text-[#969696]">
+              {/* Heart / Like */}
+              <div className="inline-flex items-center gap-1.5 hover:text-[#000000] transition">
+                <Heart className="w-4 h-4 stroke-[1.75]" />
+                <span className="text-[13px] font-normal text-[#424242]">1.4K</span>
+              </div>
+
+              {/* Comment */}
+              <div className="inline-flex items-center gap-1.5 hover:text-[#000000] transition">
+                <MessageCircle className="w-4 h-4 stroke-[1.75]" />
+                <span className="text-[13px] font-normal text-[#424242]">842</span>
+              </div>
+
+              {/* Repost */}
+              <div className="inline-flex items-center gap-1.5 hover:text-[#000000] transition">
+                <Repeat2 className="w-4 h-4 stroke-[1.75]" />
+                <span className="text-[13px] font-normal text-[#424242]">319</span>
+              </div>
+
+              {/* Share */}
+              <div className="inline-flex items-center gap-1.5 hover:text-[#000000] transition">
+                <Send className="w-4 h-4 stroke-[1.75]" />
+              </div>
+            </div>
+
+            <div className="text-[11px] font-normal text-[#969696]">
+              @Ущемись
+            </div>
           </div>
         </div>
 
