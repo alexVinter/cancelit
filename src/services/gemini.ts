@@ -112,7 +112,7 @@ export async function analyzeAdWithGemini(
       }
     ],
     generationConfig: {
-      temperature: 0.7,
+      temperature: 0.85,
       responseMimeType: 'application/json'
     }
   };
