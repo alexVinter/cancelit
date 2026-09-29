@@ -32,19 +32,25 @@ async function getSupportedModels(apiKey: string): Promise<string[]> {
         .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
         .map(m => m.name.replace('models/', ''));
 
-      // Sort priority: flash / flash-lite first, then pro, avoid embedding/imagen
+      // Sort priority: full flash (2.5/2.0/1.5) and pro first for high-quality OCR/vision.
+      // Avoid flash-lite / 8b as primary because their visual OCR on stylized/cursive fonts is drastically inferior.
       contentModels.sort((a, b) => {
         const getScore = (name: string) => {
-          if (name.includes('flash-lite')) return 3;
-          if (name.includes('flash')) return 2;
-          if (name.includes('pro')) return 1;
+          if (name.includes('2.5-flash') && !name.includes('lite')) return 100;
+          if (name.includes('2.0-flash') && !name.includes('lite')) return 90;
+          if (name.includes('1.5-flash') && !name.includes('8b') && !name.includes('lite')) return 80;
+          if (name.includes('2.5-pro')) return 75;
+          if (name.includes('1.5-pro') || name.includes('pro')) return 70;
+          if (name.includes('flash') && !name.includes('lite')) return 60;
+          if (name.includes('flash-lite')) return 20;
+          if (name.includes('8b')) return 10;
           return 0;
         };
         return getScore(b) - getScore(a);
       });
 
       if (contentModels.length > 0) {
-        console.log('Discovered supported Gemini models:', contentModels);
+        console.log('Discovered supported Gemini models (sorted by vision quality):', contentModels);
         return contentModels;
       }
     }
@@ -52,8 +58,14 @@ async function getSupportedModels(apiKey: string): Promise<string[]> {
     console.warn('Failed to dynamically query models:', e);
   }
 
-  // Fallback defaults
-  return ['gemini-3.8-flash', 'gemini-3.8-flash-lite', 'gemini-3.8-pro'];
+  // Fallback defaults with top vision models first
+  return [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-2.5-pro',
+    'gemini-1.5-pro'
+  ];
 }
 
 export async function analyzeAdWithGemini(
@@ -72,11 +84,7 @@ export async function analyzeAdWithGemini(
     throw new Error('Сервис временно недоступен: серверный ключ API не настроен. Попробуйте позже или выберите готовый пример из ленты скандалов.');
   }
 
-  const parts: Array<any> = [
-    {
-      text: `${SYSTEM_PROMPT}\n\nКОНТЕКСТ РЕКЛАМЫ / БРЕНД / СЛОГАН:\n${contextText || 'Специальный контекст не указан, проанализируй всё визуальное содержимое самостоятельно.'}`
-    }
-  ];
+  const parts: Array<any> = [];
 
   if (imageDataUrl && imageDataUrl.startsWith('data:')) {
     const match = imageDataUrl.match(/^data:([^;]+);base64,(.+)$/);
@@ -91,6 +99,10 @@ export async function analyzeAdWithGemini(
       });
     }
   }
+
+  parts.push({
+    text: `${SYSTEM_PROMPT}\n\n${imageDataUrl ? 'ВНИМАНИЕ: К запросу прикреплено изображение рекламы/креатива. Внимательно проведи OCR всех надписей, прочитай рукописные и стилизованные шрифты на банках/упаковках, текст публикации и эмодзи, улови двусмысленности и игру слов перед формированием ответа.\n\n' : ''}КОНТЕКСТ РЕКЛАМЫ / БРЕНД / СЛОГАН:\n${contextText || 'Специальный контекст не указан, проанализируй всё визуальное содержимое самостоятельно.'}`
+  });
 
   const payload = {
     contents: [
