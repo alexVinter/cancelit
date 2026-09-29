@@ -57,7 +57,7 @@ export function checkContentModeration(text: string): { isAllowed: boolean; erro
   if (containsUrl(text)) {
     return {
       isAllowed: false,
-      errorReason: 'Ссылки не принимаются. Пожалуйста, загрузите картинку (скриншот) или вставьте текст креатива напрямую.'
+      errorReason: 'По ссылкам не ходим. Закинь картинку или текст креатива'
     };
   }
 

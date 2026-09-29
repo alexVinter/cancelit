@@ -128,7 +128,7 @@ export function App() {
     // Быстрая проверка на ссылки и модерацию на клиенте
     const moderationCheck = checkContentModeration(contextText);
     if (!moderationCheck.isAllowed) {
-      setErrorMessage(moderationCheck.errorReason || 'Ссылки не принимаются. Пожалуйста, загрузите картинку или введите текст креатива напрямую.');
+      setErrorMessage(moderationCheck.errorReason || 'По ссылкам не ходим. Закинь картинку или текст креатива');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
