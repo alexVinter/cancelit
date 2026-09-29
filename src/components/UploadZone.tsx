@@ -35,14 +35,27 @@ export function UploadZone({
 }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isLoading) return;
+    if (!isLoading) {
+      setIsSlowLoading(false);
+      return;
+    }
+
     const interval = setInterval(() => {
       setLoadingMsgIdx((prev) => (prev + 1) % LOADING_MESSAGES.length);
     }, 1800);
-    return () => clearInterval(interval);
+
+    const timer = setTimeout(() => {
+      setIsSlowLoading(true);
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
   }, [isLoading]);
 
   // Global Ctrl + V paste support
@@ -222,11 +235,18 @@ export function UploadZone({
         }`}
       >
         {isLoading ? (
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-5 h-5 animate-spin text-pink-300" />
-            <span className="font-heading font-semibold text-sm">
-              {LOADING_MESSAGES[loadingMsgIdx]}
-            </span>
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-5 h-5 animate-spin text-pink-300" />
+              <span className="font-heading font-semibold text-sm">
+                {LOADING_MESSAGES[loadingMsgIdx]}
+              </span>
+            </div>
+            {isSlowLoading && (
+              <span className="text-xs text-pink-200/90 font-normal animate-fade-in">
+                Сложнооо. Чуть-чуть потерпите, надо подумать за что зацепиться
+              </span>
+            )}
           </div>
         ) : (
           <>

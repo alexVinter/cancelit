@@ -58,6 +58,7 @@ export function AnalyzerSection({
 }: AnalyzerSectionProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
   const [viewingPreset, setViewingPreset] = useState<PresetCase | null>(null);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showPresetsMenu, setShowPresetsMenu] = useState(false);
@@ -81,11 +82,23 @@ export function AnalyzerSection({
   };
 
   useEffect(() => {
-    if (!isLoading) return;
+    if (!isLoading) {
+      setIsSlowLoading(false);
+      return;
+    }
+
     const interval = setInterval(() => {
       setLoadingMsgIdx((prev) => (prev + 1) % LOADING_MESSAGES.length);
     }, 1800);
-    return () => clearInterval(interval);
+
+    const timer = setTimeout(() => {
+      setIsSlowLoading(true);
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
   }, [isLoading]);
 
   // Global Ctrl + V paste
@@ -325,9 +338,16 @@ export function AnalyzerSection({
 
           {/* Dedicated loading status row */}
           {isLoading && (
-            <div className="mt-3 pt-2.5 border-t border-[#efefef] flex items-center gap-2 text-xs font-medium text-[#000000] animate-fade-in">
-              <Sparkles className="w-3.5 h-3.5 shrink-0 animate-spin text-[#000000]" />
-              <span className="truncate text-[#000000]">{LOADING_MESSAGES[loadingMsgIdx]}</span>
+            <div className="mt-3 pt-2.5 border-t border-[#efefef] flex flex-col gap-1.5 text-xs animate-fade-in">
+              <div className="flex items-center gap-2 font-medium text-[#000000]">
+                <Sparkles className="w-3.5 h-3.5 shrink-0 animate-spin text-[#000000]" />
+                <span className="truncate text-[#000000]">{LOADING_MESSAGES[loadingMsgIdx]}</span>
+              </div>
+              {isSlowLoading && (
+                <div className="text-[12px] text-[#737373] pl-[22px] animate-fade-in font-normal leading-snug">
+                  Сложнооо. Чуть-чуть потерпите, надо подумать за что зацепиться
+                </div>
+              )}
             </div>
           )}
 
