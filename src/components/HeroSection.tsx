@@ -108,7 +108,7 @@ export function HeroSection({
           * Сервис превентивной паранойи для маркетологов
         </div>
         <div className="flex items-center gap-2">
-          <span>© 2026 УЩЕМИСЬ</span>
+          <span>© 2026 Ущемись</span>
           <span>•</span>
           <a
             href="/privacy.html"

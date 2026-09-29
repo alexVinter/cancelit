@@ -231,7 +231,7 @@ export function UploadZone({
         ) : (
           <>
             <Sparkles className="w-5 h-5 text-amber-300" />
-            <span>НАЙТИ ПОВОД УЩЕМИТЬСЯ</span>
+            <span>Найти повод ущемиться</span>
           </>
         )}
       </button>
