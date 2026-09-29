@@ -9,6 +9,7 @@ import { CookieBanner } from './components/CookieBanner';
 import { PrivacyModal } from './components/PrivacyModal';
 import type { OffenseAnalysis, PresetCase } from './types';
 import { analyzeAdWithGemini, getSavedApiKey, hasServerApiKey } from './services/gemini';
+import { checkContentModeration } from './services/moderation';
 import { AlertCircle } from 'lucide-react';
 
 export function App() {
@@ -123,6 +124,15 @@ export function App() {
 
   const handleSubmit = async () => {
     if (selectedPresetId) return;
+
+    // Быстрая проверка на ссылки и модерацию на клиенте
+    const moderationCheck = checkContentModeration(contextText);
+    if (!moderationCheck.isAllowed) {
+      setErrorMessage(moderationCheck.errorReason || 'Ссылки не принимаются. Пожалуйста, загрузите картинку или введите текст креатива напрямую.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (!apiKey) {
       setIsSettingsOpen(true);
       return;

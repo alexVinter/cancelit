@@ -9,7 +9,8 @@ import {
   ChevronUp,
   ArrowRight,
   ExternalLink,
-  Info
+  Info,
+  AlertCircle
 } from 'lucide-react';
 import type { PresetCase } from '../types';
 import { PRESET_CASES } from '../services/presetsData';
@@ -261,6 +262,14 @@ export function AnalyzerSection({
               {isDragging && (
                 <div className="p-3 my-2 rounded-[8px] bg-[#385898]/10 border border-dashed border-[#385898] text-center text-xs font-semibold text-[#385898]">
                   Отпустите файл, чтобы прикрепить картинку к посту
+                </div>
+              )}
+
+              {/* Live Link / Moderation Warning */}
+              {!moderationStatus.isAllowed && (
+                <div className="flex items-center gap-2 p-2.5 my-2 rounded-[10px] bg-[#efefef] border border-[#d5d5d5] text-xs text-[#000000] animate-fade-in">
+                  <AlertCircle className="w-4 h-4 text-[#e50010] shrink-0" />
+                  <span className="leading-snug">{moderationStatus.errorReason}</span>
                 </div>
               )}
             </div>

@@ -1,12 +1,25 @@
 /**
  * Модуль модерации контента.
  * Строго блокирует:
- * 1. Политику (РФ, Россия, политики, партии, выборы, агитация, листовки, СВО, война, чиновники).
- * 2. Чернуху и 18+ (порно, интим, геи/ЛГБТ, насилие, расчлененка, кровь, трупы, наркотики, шок-контент).
+ * 1. Ссылки / URL (пользователь должен загружать скриншот или текст, а не ссылки).
+ * 2. Политику (РФ, Россия, политики, партии, выборы, агитация, листовки, СВО, война, чиновники).
+ * 3. Чернуху и 18+ (порно, интим, геи/ЛГБТ, насилие, расчлененка, кровь, трупы, наркотики, шок-контент).
  */
 
 const BOUNDARY = '(?:^|[^а-яёa-z0-9])';
 const END_BOUNDARY = '(?:$|[^а-яёa-z0-9])';
+
+export const LINK_PATTERNS = [
+  /https?:\/\/[^\s]+/i,
+  /\bwww\.[^\s]+/i,
+  /\b(?:t\.me|telegram\.me|instagram\.com|threads\.net|vk\.com|twitter\.com|x\.com|youtube\.com|youtu\.be|tiktok\.com|facebook\.com|fb\.watch|wildberries\.ru|ozon\.ru|avito\.ru|bit\.ly|clck\.ru|tinyurl\.com)\b/i,
+  /\b[a-zA-Z0-9-]{2,}\.(?:ru|com|net|org|io|me|app|ai|co|xyz|by|kz|ua|su)\/[^\s]*/i
+];
+
+export function containsUrl(text: string): boolean {
+  if (!text) return false;
+  return LINK_PATTERNS.some(pattern => pattern.test(text));
+}
 
 export const POLITICAL_PATTERNS = [
   new RegExp(BOUNDARY + 'рф' + END_BOUNDARY, 'i'),
@@ -40,7 +53,15 @@ export function checkContentModeration(text: string): { isAllowed: boolean; erro
     return { isAllowed: true };
   }
 
-  // 1. Проверка на политику
+  // 1. Проверка на ссылки (URL)
+  if (containsUrl(text)) {
+    return {
+      isAllowed: false,
+      errorReason: 'Ссылки не принимаются. Пожалуйста, загрузите картинку (скриншот) или вставьте текст креатива напрямую.'
+    };
+  }
+
+  // 2. Проверка на политику
   for (const pattern of POLITICAL_PATTERNS) {
     if (pattern.test(text)) {
       return {
@@ -50,7 +71,7 @@ export function checkContentModeration(text: string): { isAllowed: boolean; erro
     }
   }
 
-  // 2. Проверка на чернуху, 18+ и шок-контент
+  // 3. Проверка на чернуху, 18+ и шок-контент
   for (const pattern of CHERNUKHA_PATTERNS) {
     if (pattern.test(text)) {
       return {
