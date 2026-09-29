@@ -1,4 +1,5 @@
 import { Send, Mail, ArrowUp, TrendingUp } from 'lucide-react';
+import { VerifiedBadge } from './VerifiedBadge';
 
 interface FooterProps {
   onOpenPrivacy?: () => void;
@@ -44,15 +45,7 @@ export function Footer({ onOpenPrivacy }: FooterProps = {}) {
                       <span className="font-semibold text-[15px] text-[#000000]">
                         Даниил Винтер
                       </span>
-                      {/* Meta Blue Verified Tick */}
-                      <span
-                        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#385898] text-[#fafafa] shrink-0"
-                        title="Подтверждённый профиль"
-                      >
-                        <svg viewBox="0 0 16 16" className="w-2.5 h-2.5 fill-current">
-                          <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-                        </svg>
-                      </span>
+                      <VerifiedBadge className="w-4 h-4 shrink-0" title="Подтверждённый профиль" />
                     </div>
                     <span className="text-[12px] text-[#969696]">
                       @winter_daniil • Автор идеи & PR
@@ -112,15 +105,7 @@ export function Footer({ onOpenPrivacy }: FooterProps = {}) {
                       <span className="font-semibold text-[15px] text-[#000000]">
                         Алексей Винтер
                       </span>
-                      {/* Meta Blue Verified Tick */}
-                      <span
-                        className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#385898] text-[#fafafa] shrink-0"
-                        title="Подтверждённый профиль"
-                      >
-                        <svg viewBox="0 0 16 16" className="w-2.5 h-2.5 fill-current">
-                          <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-                        </svg>
-                      </span>
+                      <VerifiedBadge className="w-4 h-4 shrink-0" title="Подтверждённый профиль" />
                     </div>
                     <span className="text-[12px] text-[#969696]">
                       @winteryaaa • Разработка & AI

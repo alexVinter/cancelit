@@ -16,6 +16,7 @@ import { PRESET_CASES } from '../services/presetsData';
 import { checkContentModeration } from '../services/moderation';
 import { AppleLogo, BudLightLogo, BalenciagaLogo, GilletteLogo, PepsiLogo } from './BrandLogos';
 import { CaseDetailModal } from './CaseDetailModal';
+import { VerifiedBadge } from './VerifiedBadge';
 
 interface AnalyzerSectionProps {
   imagePreview: string | null;
@@ -436,9 +437,7 @@ export function AnalyzerSection({
                           <span className="font-semibold text-[15px] text-[#000000] truncate">
                             {preset.brand}
                           </span>
-                          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-[#385898] shrink-0" aria-label="Verified">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.2 14.6l-3.8-3.8 1.4-1.4 2.4 2.4 6-6 1.4 1.4-7.4 7.4z"/>
-                          </svg>
+                          <VerifiedBadge className="w-3.5 h-3.5 shrink-0" title="Подтверждённый бренд" />
                           <span className="text-[13px] text-[#969696] font-normal">
                             · {preset.year} г.
                           </span>

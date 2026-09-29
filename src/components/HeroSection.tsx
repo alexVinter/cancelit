@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import { LogoIcon } from './LogoIcon';
+import { VerifiedBadge } from './VerifiedBadge';
 
 interface HeroSectionProps {
   onStartClick: () => void;
@@ -81,11 +82,7 @@ export function HeroSection({
                 <span className="font-semibold text-[14px] text-[#000000]">
                   Инспектор микроагрессий
                 </span>
-                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#385898] text-[#fafafa]">
-                  <svg viewBox="0 0 16 16" className="w-2 h-2 fill-current">
-                    <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-                  </svg>
-                </span>
+                <VerifiedBadge className="w-3.5 h-3.5 shrink-0" title="Подтверждённый профиль" />
               </div>
               <span className="text-[12px] text-[#969696]">@cringe_inspector • только что</span>
             </div>
