@@ -443,9 +443,6 @@ export function AnalyzerSection({
                             · {preset.year} г.
                           </span>
                         </div>
-                        <span className="text-[12px] text-[#385898] hover:underline cursor-pointer font-normal">
-                          {preset.tag}
-                        </span>
                       </div>
                     </div>
 
