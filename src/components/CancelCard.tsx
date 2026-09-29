@@ -130,8 +130,12 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
     }
   };
 
+  // The actual single, punchy Threads post without quotes or boilerplate
+  const rawPostText = analysis.fakeTweet?.text || analysis.outrageSummary || '';
+  const postText = rawPostText.replace(/^«\s*|\s*»$/g, '').trim();
+
   const handleCopyText = async () => {
-    const text = `🚨 ВЕРДИКТ В THREADS: ${analysis.brandOrTitle}\n\n«${analysis.outrageSummary}»\n\n💬 @${authorHandle}: «${analysis.fakeTweet?.text || ''}»\n\nИндекс токсичности: ${analysis.toxicityScore}%\nСтатус: ${analysis.statusStamp}\n💡 Совет маркетологу: ${analysis.marketerAdvice || ''}\n\nПроверено в @Ущемись`;
+    const text = `🚨 ВЕРДИКТ В THREADS: ${analysis.brandOrTitle}\n\n💬 @${authorHandle}: ${postText}\n\nИндекс токсичности: ${analysis.toxicityScore}%\nСтатус: ${analysis.statusStamp}\n💡 Совет маркетологу: ${analysis.marketerAdvice || ''}\n\nПроверено в @Ущемись`;
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -219,17 +223,10 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
 
         {/* Post Text: The Scathing Viral Take */}
         <div className="space-y-3 mb-3 pl-0 sm:pl-[52px]">
-          {/* Main punchline */}
-          <p className="text-[15px] leading-[1.4] text-[#000000] font-normal">
-            Ну что, новый «шедевр» от <strong className="font-semibold">{analysis.brandOrTitle}</strong>. {analysis.outrageSummary}
+          {/* The Viral Post Take */}
+          <p className="text-[15px] leading-[1.4] text-[#000000] font-normal whitespace-pre-line">
+            {postText}
           </p>
-
-          {/* Fake Tweet Text (Direct quote of why brand messed up) */}
-          {analysis.fakeTweet?.text && (
-            <p className="text-[15px] leading-[1.4] text-[#000000] font-normal">
-              «{analysis.fakeTweet.text}»
-            </p>
-          )}
 
           {/* Media / Ad Preview Container */}
           {imageSrc ? (
