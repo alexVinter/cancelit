@@ -88,7 +88,7 @@ export function HeroSection({
             </div>
           </div>
           <p className="text-[14px] text-[#000000] leading-snug">
-            «Ребят, вы серьёзно утвердили этот креатив в 2026 году? Опять обесценивание, лукизм и тонна токсичности. Давайте сразу отмену...»
+            Ребят, вы серьёзно утвердили этот креатив в 2026 году? Опять обесценивание, лукизм и тонна токсичности. Давайте сразу отменим...
           </p>
           <div className="flex items-center gap-4 mt-3 text-[12px] text-[#969696] pt-2 border-t border-[#efefef]">
             <span>❤️ 1.4K</span>
