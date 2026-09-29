@@ -198,7 +198,7 @@ export function App() {
                 <div className="w-full bg-[#ffffff] border border-[#efefef] rounded-[18px] p-4 flex items-start gap-3 shadow-[0_0_12px_rgba(0,0,0,0.03)] animate-fade-in">
                   <AlertCircle className="w-5 h-5 text-[#385898] shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-[14px] font-semibold text-[#000000]">Не удалось завершить ущемление:</strong>
+                    <strong className="block text-[14px] font-semibold text-[#000000]">Не удалось завершить ущемление</strong>
                     <span className="text-[13px] text-[#424242] leading-relaxed">{errorMessage}</span>
                   </div>
                 </div>
