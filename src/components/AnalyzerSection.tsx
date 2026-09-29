@@ -335,23 +335,22 @@ export function AnalyzerSection({
           {showHowItWorks && (
             <div className="mt-4 pt-3 border-t border-[#efefef] space-y-2.5 text-xs text-[#000000] animate-fade-in">
               <div className="font-semibold text-[13px] text-[#000000] mb-1">
-                Как это работает: три шага до тотальной отмены
+                Как это работает
               </div>
               <div className="flex items-start gap-2">
-                <span className="font-bold text-[#385898]">1.</span>
-                <span><strong>Загрузи креатив или слоган:</strong> баннер, макет из Figma, скриншот поста или текст слогана.</span>
+                <span className="font-bold text-[#0095F6]">1.</span>
+                <span><strong>Загрузи креатив или слоган.</strong> Баннер, макет из Figma, скриншот поста или текст.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="font-bold text-[#385898]">2.</span>
-                <span><strong>ИИ сканирует микроагрессии:</strong> нейросеть придирчиво находит скрытые обиды, лукизм и эйджизм.</span>
+                <span className="font-bold text-[#0095F6]">2.</span>
+                <span><strong>ИИ сканирует микроагрессии.</strong> Нейросеть придирчиво находит скрытые обиды, лукизм и эйджизм.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="font-bold text-[#385898]">3.</span>
-                <span><strong>Забирай вирусный Threads-пост:</strong> готовый скриншот публикации с индексом токсичности и советом маркетологу.</span>
+                <span className="font-bold text-[#0095F6]">3.</span>
+                <span><strong>Забирай пост.</strong> Готовый скриншот публикации с индексом токсичности и советом маркетологу.</span>
               </div>
-              <div className="flex items-start gap-2 pt-2 border-t border-[#efefef] text-[11px] text-[#969696]">
-                <span>🔒</span>
-                <span><strong>Без политики и чернухи:</strong> сервис предназначен строго для коммерческого маркетинга брендов. Любые темы политики РФ, партий, агитации и шок-контента автоматически блокируются.</span>
+              <div className="pt-2 border-t border-[#efefef] text-[11px] text-[#969696] leading-relaxed">
+                <span><strong>Без политики и чернухи.</strong> Сервис предназначен строго для коммерческого маркетинга брендов. Любые темы политики, агитации и шок-контента автоматически блокируются.</span>
               </div>
             </div>
           )}
