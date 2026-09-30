@@ -31,7 +31,7 @@ const DIVERSE_FALLBACK_PERSONAS = [
   { handle: 'avocado_snob', name: 'Эстетический критик' },
   { handle: 'toxic_positivity', name: 'Коуч по выгоранию' },
   { handle: 'threads_tribunal', name: 'Палата нравов' },
-  { handle: 'gaslight_detector', name: 'Психотерапевт из Твиттера' },
+  { handle: 'gaslight_detector', name: 'Психотерапевт из Тредса' },
   { handle: 'minimalism_victim', name: 'Жертва редизайна' },
   { handle: 'prana_warrior', name: 'Адепт осознанности' },
   { handle: 'kpi_destroyer', name: 'Бывший директор по счастью' },
