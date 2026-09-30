@@ -105,9 +105,9 @@ export const SYSTEM_PROMPT = `
   ],
   "fakeTweet": {
     "author": "Язвительный статус автора под тему (например: 'Адвокат внуков', 'Защитник нормальных солений', 'Бывший фанат Тархуна')",
-    "handle": "@уникальный_английский_ник_под_тему",
+    "handle": "@реалистичный_ник_латиницей_без_цифр (например: '@cringe_slayer', '@toxic_avocado', '@cancel_culture' — СТРОГО БЕЗ ГОДА И ЦИФР ВРОДЕ 2026 НА КОНЦЕ!)",
     "verified": true,
-    "avatar": "https://api.dicebear.com/7.x/notionists/svg?seed=любое_слово_под_тему",
+    "avatar": "https://api.dicebear.com/7.x/notionists/svg?seed=unique_persona",
     "text": "Тот самый хлёсткий, ядовитый тред/пост с разъёбом бренда по его подписи или картинке! Без кавычек, без точек на конце, 1-2 предложения, сочный циничный юмор!",
     "retweets": "19.4K",
     "likes": "54K",

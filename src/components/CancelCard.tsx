@@ -43,6 +43,9 @@ function resolveAuthorIdentity(analysis: OffenseAnalysis) {
   let rawName = (analysis.fakeTweet?.author || '').trim();
   let rawAvatar = (analysis.fakeTweet?.avatar || '').trim();
 
+  // Clean trailing year suffix if AI mistakenly appended it (e.g. _2026, -2026, 2026)
+  rawHandle = rawHandle.replace(/[_-]?202\d$/i, '');
+
   // If handle is missing, default, or the old repeated moral_watchdog
   if (!rawHandle || rawHandle.toLowerCase() === 'moral_watchdog') {
     const seedStr = (analysis.brandOrTitle || 'persona') + (analysis.outrageSummary || '');
@@ -62,18 +65,30 @@ function resolveAuthorIdentity(analysis: OffenseAnalysis) {
     rawName = 'Палата нравов';
   }
 
-  // Diverse avatar styles: notionists (minimalist hand-drawn), lorelei (modern character), avataaars (classic cartoon)
-  const avatarStyles = ['notionists', 'lorelei', 'avataaars'];
+  // Diverse avatar styles: notionists (minimalist hand-drawn), lorelei (modern character), avataaars (classic cartoon), personas
+  const avatarStyles = ['notionists', 'lorelei', 'avataaars', 'personas'];
+  const seedBase = (rawHandle || '') + (analysis.brandOrTitle || '') + (analysis.outrageSummary || '') + (analysis.fakeTweet?.author || '');
   let seedNum = 0;
-  for (let i = 0; i < rawHandle.length; i++) {
-    seedNum = (seedNum << 5) - seedNum + rawHandle.charCodeAt(i);
+  for (let i = 0; i < seedBase.length; i++) {
+    seedNum = (seedNum << 5) - seedNum + seedBase.charCodeAt(i);
     seedNum |= 0;
   }
   const chosenStyle = avatarStyles[Math.abs(seedNum) % avatarStyles.length];
+  const uniqueSeed = `${rawHandle || 'author'}_${Math.abs(seedNum)}`;
 
-  // If avatar is missing, or is the old robot bottts with seed=offended
-  if (!rawAvatar || rawAvatar.includes('bottts') || rawAvatar.includes('seed=offended')) {
-    rawAvatar = `https://api.dicebear.com/7.x/${chosenStyle}/svg?seed=${encodeURIComponent(rawHandle)}`;
+  // If avatar is missing, generic fallback, or repeats placeholder seeds
+  const isGenericAvatar = !rawAvatar || 
+    rawAvatar.includes('bottts') || 
+    rawAvatar.includes('seed=offended') || 
+    rawAvatar.includes('любое_слово') ||
+    rawAvatar.includes('случайное') ||
+    rawAvatar.includes('%D0%BB%D1%8E%D0%B1%D0%BE%D0%B5') ||
+    rawAvatar.includes('unique_persona') ||
+    rawAvatar.endsWith('seed=') ||
+    rawAvatar.includes('seed=любое');
+
+  if (isGenericAvatar) {
+    rawAvatar = `https://api.dicebear.com/7.x/${chosenStyle}/svg?seed=${encodeURIComponent(uniqueSeed)}`;
   }
 
   return { authorHandle: rawHandle, authorName: rawName, authorAvatar: rawAvatar };
