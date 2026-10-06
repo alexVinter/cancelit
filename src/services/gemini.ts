@@ -119,7 +119,6 @@ export async function analyzeAdWithGemini(
 
   // Get models dynamically registered in this user's Google AI Studio project
   const candidateModels = await getSupportedModels(apiKey);
-  let lastErrorMsg = '';
 
   for (const model of candidateModels) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
@@ -142,7 +141,6 @@ export async function analyzeAdWithGemini(
         }
 
         console.warn(`Model ${model} returned error: ${msg}. Trying next available model...`);
-        lastErrorMsg = msg;
         continue;
       }
 
@@ -150,7 +148,6 @@ export async function analyzeAdWithGemini(
       const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!rawText) {
-        lastErrorMsg = 'Модель вернула пустой ответ';
         continue;
       }
 
@@ -164,7 +161,6 @@ export async function analyzeAdWithGemini(
       }
 
       if (!parsed.brandOrTitle || !parsed.toxicityScore) {
-        lastErrorMsg = 'Некорректный формат ответа';
         continue;
       }
 
@@ -173,11 +169,10 @@ export async function analyzeAdWithGemini(
       if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('строго запрещена') || err.message?.includes('строго запрещены') || err.message?.includes('отклонён модерацией')) {
         throw err;
       }
-      lastErrorMsg = err.message || 'Ошибка сети';
       console.warn(`Error on model ${model}:`, err);
       continue;
     }
   }
 
-  throw new Error(`Все доступные модели Gemini сейчас перегружены: ${lastErrorMsg}. Нажмите кнопку ещё раз через пару секунд.`);
+  throw new Error('Не удалось. Попробуйте ещё раз.');
 }

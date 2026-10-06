@@ -153,7 +153,18 @@ export function App() {
         }
       }, 120);
     } catch (error: any) {
-      setErrorMessage(error.message || 'Ошибка при анализе');
+      const msg = error?.message || '';
+      if (
+        msg.includes('запрещен') ||
+        msg.includes('модераци') ||
+        msg.includes('API-ключ') ||
+        msg.includes('ссылкам не ходим') ||
+        msg.includes('серверный ключ')
+      ) {
+        setErrorMessage(msg);
+      } else {
+        setErrorMessage('Не удалось. Попробуйте ещё раз.');
+      }
     } finally {
       setIsLoading(false);
     }
