@@ -31,7 +31,7 @@ export function Footer({ onOpenPrivacy }: FooterProps = {}) {
           <div className="rounded-[18px] bg-[#ffffff] border border-[#efefef] p-5 shadow-[0_0_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   {/* Threads Profile Avatar */}
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-[#d5d5d5] bg-[#efefef] shrink-0 select-none">
                     <img 
@@ -40,20 +40,20 @@ export function Footer({ onOpenPrivacy }: FooterProps = {}) {
                       className="w-full h-full object-cover" 
                     />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-[15px] text-[#000000]">
+                      <span className="font-semibold text-[15px] text-[#000000] truncate">
                         Даниил Винтер
                       </span>
                       <VerifiedBadge className="w-4 h-4 shrink-0" title="Подтверждённый профиль" />
                     </div>
-                    <span className="text-[12px] text-[#969696]">
-                      @winter_daniil • Автор идеи & PR
+                    <span className="text-[12px] text-[#969696] block truncate">
+                      @winter_daniil
                     </span>
                   </div>
                 </div>
 
-                <span className="text-[11px] font-medium text-[#424242] px-2.5 py-1 rounded-full bg-[#efefef]">
+                <span className="text-[11px] font-medium text-[#424242] px-2.5 py-1 rounded-full bg-[#efefef] whitespace-nowrap shrink-0">
                   PR & Идея
                 </span>
               </div>
@@ -91,7 +91,7 @@ export function Footer({ onOpenPrivacy }: FooterProps = {}) {
           <div className="rounded-[18px] bg-[#ffffff] border border-[#efefef] p-5 shadow-[0_0_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   {/* Threads Profile Avatar */}
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-[#d5d5d5] bg-[#efefef] shrink-0 select-none">
                     <img 
@@ -100,20 +100,20 @@ export function Footer({ onOpenPrivacy }: FooterProps = {}) {
                       className="w-full h-full object-cover" 
                     />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-[15px] text-[#000000]">
+                      <span className="font-semibold text-[15px] text-[#000000] truncate">
                         Алексей Винтер
                       </span>
                       <VerifiedBadge className="w-4 h-4 shrink-0" title="Подтверждённый профиль" />
                     </div>
-                    <span className="text-[12px] text-[#969696]">
-                      @winteryaaa • Разработка & AI
+                    <span className="text-[12px] text-[#969696] block truncate">
+                      @winteryaaa
                     </span>
                   </div>
                 </div>
 
-                <span className="text-[11px] font-medium text-[#424242] px-2.5 py-1 rounded-full bg-[#efefef]">
+                <span className="text-[11px] font-medium text-[#424242] px-2.5 py-1 rounded-full bg-[#efefef] whitespace-nowrap shrink-0">
                   Разработка
                 </span>
               </div>

@@ -38,6 +38,36 @@ const DIVERSE_FALLBACK_PERSONAS = [
   { handle: 'gluten_intolerant', name: 'Безглютеновый борец' }
 ];
 
+export function formatRussianQuotes(str: string): string {
+  if (!str) return '';
+  let res = str;
+  res = res.replace(/"([^"]+)"/g, '«$1»');
+  res = res.replace(/'([^']+)'/g, '«$1»');
+  res = res.replace(/[“‘]([^”’]+)[”’]/g, '«$1»');
+  res = res.replace(/(^|[\s(\[{])['"“‘](?=\S)/g, '$1«');
+  res = res.replace(/(?<=\S)['"”’]([.,!?;:\s)\]}]|$)/g, '»$1');
+  return res;
+}
+
+export function formatTriggerRow(element: string, trigger: string) {
+  let cleanEl = (element || '').trim();
+  cleanEl = cleanEl.replace(/[:;.]\s*$/, '').trim();
+  cleanEl = formatRussianQuotes(cleanEl);
+
+  let cleanTrigger = (trigger || '').trim();
+  cleanTrigger = formatRussianQuotes(cleanTrigger);
+  if (cleanTrigger.length > 0) {
+    cleanTrigger = cleanTrigger.charAt(0).toUpperCase() + cleanTrigger.slice(1);
+  }
+
+  const endsWithPunct = /[.?!]$/.test(cleanEl);
+  return { 
+    formattedElement: cleanEl, 
+    formattedTrigger: cleanTrigger,
+    elementSeparator: endsWithPunct ? '' : '.'
+  };
+}
+
 function resolveAuthorIdentity(analysis: OffenseAnalysis) {
   let rawHandle = (analysis.fakeTweet?.handle || '').replace(/^@/, '').trim();
   let rawName = (analysis.fakeTweet?.author || '').trim();
@@ -147,7 +177,7 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
 
   // The actual single, punchy Threads post without quotes or boilerplate
   const rawPostText = analysis.fakeTweet?.text || analysis.outrageSummary || '';
-  const postText = rawPostText.replace(/^«\s*|\s*»$/g, '').trim();
+  const postText = formatRussianQuotes(rawPostText.replace(/^«\s*|\s*»$/g, '').trim());
 
   const handleCopyText = async () => {
     const text = `🚨 ВЕРДИКТ В THREADS: ${analysis.brandOrTitle}\n\n💬 @${authorHandle}: ${postText}\n\nИндекс токсичности: ${analysis.toxicityScore}%\nСтатус: ${analysis.statusStamp}\n💡 Совет маркетологу: ${analysis.marketerAdvice || ''}\n\nПроверено в @Ущемись`;
@@ -331,14 +361,20 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
         <div className="space-y-3 pt-1 text-[13px]">
           
           {/* Microaggression Trigger */}
-          {analysis.microaggressions && analysis.microaggressions.length > 0 && (
-            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-              <span className="font-semibold text-[#969696] sm:w-28 shrink-0">Триггер:</span>
-              <div className="text-[#000000] leading-snug">
-                <strong>{analysis.microaggressions[0].element}:</strong> {analysis.microaggressions[0].trigger}
+          {analysis.microaggressions && analysis.microaggressions.length > 0 && (() => {
+            const { formattedElement, formattedTrigger, elementSeparator } = formatTriggerRow(
+              analysis.microaggressions[0].element,
+              analysis.microaggressions[0].trigger
+            );
+            return (
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                <span className="font-semibold text-[#969696] sm:w-28 shrink-0">Триггер:</span>
+                <div className="text-[#000000] leading-snug">
+                  <strong>{formattedElement}{elementSeparator}</strong> {formattedTrigger}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Offended Groups */}
           {analysis.offendedGroups && analysis.offendedGroups.length > 0 && (
