@@ -163,7 +163,7 @@ export function App() {
       ) {
         setErrorMessage(msg);
       } else {
-        setErrorMessage('Не удалось. Попробуйте ещё раз.');
+        setErrorMessage('Нажмите на кнопку ещё раз через пару секунд.');
       }
     } finally {
       setIsLoading(false);

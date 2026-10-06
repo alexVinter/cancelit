@@ -174,5 +174,5 @@ export async function analyzeAdWithGemini(
     }
   }
 
-  throw new Error('Не удалось. Попробуйте ещё раз.');
+  throw new Error('Нажмите на кнопку ещё раз через пару секунд.');
 }
