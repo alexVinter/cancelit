@@ -71,9 +71,9 @@ async function getSupportedModels(apiKey: string): Promise<string[]> {
         .filter(m => !m.includes('embedding') && !m.includes('imagen') && !m.includes('aqa'));
 
       // Sort priority:
-      // Tier 1: Full Gemini 2.0 Flash (Fastest, razor-sharp vision OCR & witty sarcasm)
-      // Tier 2: Gemini 1.5 Pro / 2.5 Pro (Deepest literary quality, high-res vision)
-      // Tier 3: Gemini 1.5 Flash (Rock-solid reliable standard workhorse)
+      // Tier 1: Gemini 1.5 Flash (Proven speed ~10-20s, sharp vision OCR & witty sarcasm)
+      // Tier 2: Gemini 2.0 Flash (Next-gen fast multimodal model)
+      // Tier 3: Gemini 1.5 Pro / 2.5 Pro (Deep literary copywriting)
       // Bottom: thinking / lite / 8b kept at the very end as safety net
       contentModels.sort((a, b) => {
         const getScore = (name: string) => {
@@ -83,17 +83,17 @@ async function getSupportedModels(apiKey: string): Promise<string[]> {
           if (name.includes('flash-lite')) return 15;
           if (name.includes('8b')) return 12;
 
-          // Tier 1: Gemini 2.0 Flash (Fastest + Top Vision OCR)
-          if (name === 'gemini-2.0-flash') return 100;
-          if (name.includes('2.0-flash')) return 95;
+          // Tier 1: Gemini 1.5 Flash (The proven workhorse: ~15-25s, sharp OCR, great humor)
+          if (name === 'gemini-1.5-flash') return 100;
+          if (name.includes('1.5-flash')) return 95;
 
-          // Tier 2: Gemini 1.5 Pro / 2.5 Pro (Deep literary copywriting)
-          if (name === 'gemini-1.5-pro') return 90;
-          if (name.includes('pro')) return 85;
+          // Tier 2: Gemini 2.0 Flash
+          if (name === 'gemini-2.0-flash') return 90;
+          if (name.includes('2.0-flash')) return 85;
 
-          // Tier 3: Gemini 1.5 Flash (Bulletproof Google fallback)
-          if (name === 'gemini-1.5-flash') return 80;
-          if (name.includes('1.5-flash')) return 75;
+          // Tier 3: Gemini 1.5 Pro / 2.5 Pro (Deep literary copywriting)
+          if (name === 'gemini-1.5-pro') return 80;
+          if (name.includes('pro')) return 75;
 
           return 30;
         };
@@ -111,11 +111,11 @@ async function getSupportedModels(apiKey: string): Promise<string[]> {
   }
 
   // Fallback defaults with safe tiering:
-  // Top speed & vision first (2.0 Flash), literary Pro second, rock-solid 1.5 Flash third
+  // Proven fast 1.5 Flash first, 2.0 Flash second, literary Pro third
   const defaults = [
+    'gemini-1.5-flash',
     'gemini-2.0-flash',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash'
+    'gemini-1.5-pro'
   ];
   return prioritizeModel(defaults, preferred);
 }

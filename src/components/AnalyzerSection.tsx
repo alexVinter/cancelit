@@ -120,7 +120,7 @@ export function AnalyzerSection({
     return () => window.removeEventListener('paste', handlePaste);
   }, []);
 
-  const compressImage = (file: File, maxDim = 2048, quality = 0.92): Promise<string> => {
+  const compressImage = (file: File, maxDim = 1600, quality = 0.88): Promise<string> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
