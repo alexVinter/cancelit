@@ -5,14 +5,12 @@ import { checkVpnStatus } from '../services/vpnCheck';
 interface VpnWarningModalProps {
   isOpen: boolean;
   onClose: () => void;
-  incidentId?: string;
   onSuccess?: () => void;
 }
 
 export const VpnWarningModal: React.FC<VpnWarningModalProps> = ({
   isOpen,
   onClose,
-  incidentId = 'fab_vpn_20261012_01M4RDAAWH3Q2QV7',
   onSuccess
 }) => {
   const [isChecking, setIsChecking] = useState(false);
@@ -82,7 +80,7 @@ export const VpnWarningModal: React.FC<VpnWarningModalProps> = ({
 
         {/* Title */}
         <h3 className="text-[19px] sm:text-[21px] font-bold text-[#000000] tracking-tight">
-          Похоже, у вас выключен VPN
+          Похоже, у вас в<span className="font-extrabold">Ы</span>ключен VPN
         </h3>
 
         {/* Subtitle */}
@@ -99,12 +97,12 @@ export const VpnWarningModal: React.FC<VpnWarningModalProps> = ({
           </div>
         )}
 
-        {/* Buttons Row (our design code: rounded-full pills, solid black primary, soft gray secondary) */}
+        {/* Buttons Row */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 w-full mt-6">
           <button
             onClick={handleRecheckOrReload}
             disabled={isChecking}
-            className="w-full sm:w-auto min-w-[160px] h-[42px] px-5 rounded-full bg-[#000000] text-[#ffffff] font-semibold text-[13.5px] hover:bg-[#262626] active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
+            className="w-full sm:w-auto min-w-[130px] h-[42px] px-6 rounded-full bg-[#000000] text-[#fafafa] font-semibold text-[14px] hover:bg-[#222222] active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-60 whitespace-nowrap"
           >
             {isChecking ? (
               <>
@@ -119,23 +117,18 @@ export const VpnWarningModal: React.FC<VpnWarningModalProps> = ({
             ) : (
               <>
                 <RotateCw className="w-4 h-4" />
-                <span>Обновить страницу</span>
+                <span>Обновить</span>
               </>
             )}
           </button>
 
           <button
             onClick={handleDismiss}
-            className="w-full sm:w-auto h-[42px] px-5 rounded-full bg-[#efefef] text-[#000000] font-semibold text-[13.5px] hover:bg-[#e4e4e4] active:scale-95 transition flex items-center justify-center cursor-pointer"
+            className="w-full sm:w-auto min-w-[110px] h-[42px] px-6 rounded-full bg-[#efefef] text-[#000000] font-semibold text-[14px] hover:bg-[#e4e4e4] active:scale-95 transition flex items-center justify-center cursor-pointer whitespace-nowrap"
           >
-            Всё равно продолжить
+            Пофиг
           </button>
         </div>
-
-        {/* Incident ID footer in fine mono print */}
-        <p className="text-[11px] font-mono text-[#a3a3a3] mt-5 select-all">
-          Инцидент: {incidentId}
-        </p>
       </div>
     </div>
   );

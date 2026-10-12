@@ -10,9 +10,10 @@ import {
   Send,
   MoreHorizontal,
   Flame,
-  ArrowLeft
+  ArrowLeft,
+  RotateCw
 } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { toPng, toBlob } from 'html-to-image';
 import { VerifiedBadge } from './VerifiedBadge';
 
 interface CancelCardProps {
@@ -179,14 +180,42 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
   const rawPostText = analysis.fakeTweet?.text || analysis.outrageSummary || '';
   const postText = formatRussianQuotes(rawPostText.replace(/^«\s*|\s*»$/g, '').trim());
 
-  const handleCopyText = async () => {
-    const text = `🚨 ВЕРДИКТ В THREADS: ${analysis.brandOrTitle}\n\n💬 @${authorHandle}: ${postText}\n\nИндекс токсичности: ${analysis.toxicityScore}%\nСтатус: ${analysis.statusStamp}\n💡 Совет маркетологу: ${analysis.marketerAdvice || ''}\n\nПроверено в @Ущемись`;
+  const [copyingImage, setCopyingImage] = useState(false);
+
+  const handleCopyCardImage = async () => {
+    if (!cardRef.current || copyingImage) return;
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy', err);
+      setCopyingImage(true);
+      const blob = await toBlob(cardRef.current, {
+        pixelRatio: 2,
+        backgroundColor: '#fafafa',
+        cacheBust: true,
+      });
+
+      if (!blob) {
+        throw new Error('Не удалось сформировать изображение');
+      }
+
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard && navigator.clipboard.write) {
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        throw new Error('Браузер не поддерживает запись изображений в буфер');
+      }
+    } catch (err: any) {
+      console.warn('Image clipboard write failed, fallback to text:', err);
+      try {
+        const text = `🚨 ВЕРДИКТ В THREADS: ${analysis.brandOrTitle}\n\n💬 @${authorHandle}: ${postText}\n\nИндекс токсичности: ${analysis.toxicityScore}%\nСтатус: ${analysis.statusStamp}\n💡 Совет маркетологу: ${analysis.marketerAdvice || ''}\n\nПроверено в @Ущемись`;
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (e) {
+        alert('Не удалось скопировать изображение в буфер. Вы можете скачать его кнопкой «Скачать PNG».');
+      }
+    } finally {
+      setCopyingImage(false);
     }
   };
 
@@ -204,18 +233,25 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
         
         <div className="flex items-center gap-2">
           <button 
-            onClick={handleCopyText}
-            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#ffffff] hover:bg-[#efefef] border border-[#d5d5d5] rounded-full text-xs font-semibold text-[#000000] transition active:scale-95"
-            title="Скопировать текст"
+            onClick={handleCopyCardImage}
+            disabled={copyingImage}
+            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#ffffff] hover:bg-[#efefef] border border-[#d5d5d5] rounded-full text-xs font-semibold text-[#000000] transition active:scale-95 disabled:opacity-60 whitespace-nowrap"
+            title="Скопировать картинку треда в буфер обмена"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-[#385898]" /> : <Copy className="w-3.5 h-3.5 text-[#424242]" />}
-            <span>{copied ? 'Скопировано!' : 'Скопировать'}</span>
+            {copyingImage ? (
+              <RotateCw className="w-3.5 h-3.5 animate-spin text-[#424242]" />
+            ) : copied ? (
+              <Check className="w-3.5 h-3.5 text-[#385898]" />
+            ) : (
+              <Copy className="w-3.5 h-3.5 text-[#424242]" />
+            )}
+            <span>{copyingImage ? 'Копируем...' : copied ? 'Скопировано!' : 'Скопировать'}</span>
           </button>
 
           <button 
             onClick={handleDownloadPng}
             disabled={downloading}
-            className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#000000] hover:bg-[#222222] text-[#fafafa] rounded-full text-xs font-semibold transition active:scale-95"
+            className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#000000] hover:bg-[#222222] text-[#fafafa] rounded-full text-xs font-semibold transition active:scale-95 whitespace-nowrap"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{downloading ? 'Экспорт...' : 'Скачать PNG'}</span>
@@ -325,9 +361,9 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
 
             {/* Share */}
             <button 
-              onClick={handleCopyText} 
+              onClick={handleCopyCardImage} 
               className="cursor-pointer inline-flex items-center gap-1.5 hover:text-[#000000] transition" 
-              title="Поделиться"
+              title="Скопировать тред"
             >
               <Send className="w-4 h-4 stroke-[1.75]" />
             </button>

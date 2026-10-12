@@ -20,7 +20,6 @@ export function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isVpnModalOpen, setIsVpnModalOpen] = useState(false);
-  const [vpnIncidentId, setVpnIncidentId] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [contextText, setContextText] = useState('');
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
@@ -66,9 +65,6 @@ export function App() {
     const isDismissed = sessionStorage.getItem('vpn_modal_dismissed');
     if (!isDismissed) {
       checkVpnStatus().then((result) => {
-        if (result.incidentId) {
-          setVpnIncidentId(result.incidentId);
-        }
         if (result.isBlocked) {
           setIsVpnModalOpen(true);
         }
@@ -309,7 +305,6 @@ export function App() {
       <VpnWarningModal
         isOpen={isVpnModalOpen}
         onClose={() => setIsVpnModalOpen(false)}
-        incidentId={vpnIncidentId}
         onSuccess={() => setIsVpnModalOpen(false)}
       />
     </div>
