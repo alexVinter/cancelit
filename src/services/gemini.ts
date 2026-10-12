@@ -20,52 +20,104 @@ export function saveApiKey(key: string): void {
   }
 }
 
+let cachedDiscoveredModels: string[] | null = null;
+const WORKING_MODEL_STORAGE_KEY = 'offended_ai_working_model';
+
+function getSavedWorkingModel(): string {
+  try {
+    return sessionStorage.getItem(WORKING_MODEL_STORAGE_KEY) || localStorage.getItem(WORKING_MODEL_STORAGE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function saveWorkingModel(model: string): void {
+  try {
+    if (model) {
+      sessionStorage.setItem(WORKING_MODEL_STORAGE_KEY, model);
+      localStorage.setItem(WORKING_MODEL_STORAGE_KEY, model);
+    }
+  } catch {}
+}
+
+function prioritizeModel(models: string[], preferred: string): string[] {
+  if (!preferred || !models.includes(preferred)) return models;
+  return [preferred, ...models.filter(m => m !== preferred)];
+}
+
 // Fetch the real list of available models for this specific API key
 async function getSupportedModels(apiKey: string): Promise<string[]> {
+  const preferred = getSavedWorkingModel();
+
+  if (cachedDiscoveredModels && cachedDiscoveredModels.length > 0) {
+    return prioritizeModel(cachedDiscoveredModels, preferred);
+  }
+
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
     if (res.ok) {
       const data = await res.json();
       const models: Array<{ name: string; supportedGenerationMethods?: string[] }> = data.models || [];
       
       const contentModels = models
         .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
-        .map(m => m.name.replace('models/', ''));
+        .map(m => m.name.replace('models/', ''))
+        .filter(m => !m.includes('embedding') && !m.includes('imagen') && !m.includes('aqa'));
 
-      // Sort priority: full flash (2.5/2.0/1.5) and pro first for high-quality OCR/vision.
-      // Avoid flash-lite / 8b as primary because their visual OCR on stylized/cursive fonts is drastically inferior.
+      // Sort priority:
+      // Tier 1: Full Gemini 2.0 Flash (Fastest, razor-sharp vision OCR & witty sarcasm)
+      // Tier 2: Gemini 1.5 Pro / 2.5 Pro (Deepest literary quality, high-res vision)
+      // Tier 3: Gemini 1.5 Flash (Rock-solid reliable standard workhorse)
+      // Bottom: thinking / lite / 8b kept at the very end as safety net
       contentModels.sort((a, b) => {
         const getScore = (name: string) => {
-          if (name.includes('2.5-flash') && !name.includes('lite')) return 100;
-          if (name.includes('2.0-flash') && !name.includes('lite')) return 90;
-          if (name.includes('1.5-flash') && !name.includes('8b') && !name.includes('lite')) return 80;
-          if (name.includes('2.5-pro')) return 75;
-          if (name.includes('1.5-pro') || name.includes('pro')) return 70;
-          if (name.includes('flash') && !name.includes('lite')) return 60;
-          if (name.includes('flash-lite')) return 20;
-          if (name.includes('8b')) return 10;
-          return 0;
+          // Thinking models spend 30-40s in reasoning tokens; keep as deep safety net
+          if (name.includes('thinking')) return 10;
+          // Avoid lite/8b as primary because of inferior OCR on stylized/cursive fonts
+          if (name.includes('flash-lite')) return 15;
+          if (name.includes('8b')) return 12;
+
+          // Tier 1: Gemini 2.0 Flash (Fastest + Top Vision OCR)
+          if (name === 'gemini-2.0-flash') return 100;
+          if (name.includes('2.0-flash')) return 95;
+
+          // Tier 2: Gemini 1.5 Pro / 2.5 Pro (Deep literary copywriting)
+          if (name === 'gemini-1.5-pro') return 90;
+          if (name.includes('pro')) return 85;
+
+          // Tier 3: Gemini 1.5 Flash (Bulletproof Google fallback)
+          if (name === 'gemini-1.5-flash') return 80;
+          if (name.includes('1.5-flash')) return 75;
+
+          return 30;
         };
         return getScore(b) - getScore(a);
       });
 
       if (contentModels.length > 0) {
-        console.log('Discovered supported Gemini models (sorted by vision quality):', contentModels);
-        return contentModels;
+        cachedDiscoveredModels = contentModels;
+        console.log('Discovered supported Gemini models (prioritized for quality & speed):', contentModels);
+        return prioritizeModel(contentModels, preferred);
       }
     }
   } catch (e) {
     console.warn('Failed to dynamically query models:', e);
   }
 
-  // Fallback defaults with top vision models first
-  return [
-    'gemini-2.5-flash',
+  // Fallback defaults with safe tiering:
+  // Top speed & vision first (2.0 Flash), literary Pro second, rock-solid 1.5 Flash third
+  const defaults = [
     'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-2.5-pro',
-    'gemini-1.5-pro'
+    'gemini-1.5-pro',
+    'gemini-1.5-flash'
   ];
+  return prioritizeModel(defaults, preferred);
 }
 
 export async function analyzeAdWithGemini(
@@ -122,15 +174,26 @@ export async function analyzeAdWithGemini(
 
   for (const model of candidateModels) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
+    const timerLabel = `[Gemini] ${model}`;
 
     try {
+      console.log(`[Gemini] Attempting generation with model: ${model}`);
+      console.time(timerLabel);
+
+      const controller = new AbortController();
+      // 25 second timeout per model attempt to prevent long hangs on overloaded models
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
+      console.timeEnd(timerLabel);
 
       if (!response.ok) {
         const errData = await response.json().catch(() => null);
@@ -168,8 +231,14 @@ export async function analyzeAdWithGemini(
         continue;
       }
 
+      // Save known working model so subsequent queries hit it immediately
+      saveWorkingModel(model);
+      console.log(`[Gemini] Successfully generated verdict with model: ${model}`);
+
       return parsed as OffenseAnalysis;
     } catch (err: any) {
+      try { console.timeEnd(timerLabel); } catch {}
+
       if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('VPN_LOCATION_BLOCKED') || err.message?.includes('строго запрещена') || err.message?.includes('строго запрещены') || err.message?.includes('отклонён модерацией')) {
         throw err;
       }
