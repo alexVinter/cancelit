@@ -140,6 +140,10 @@ export async function analyzeAdWithGemini(
           throw new Error('Указан недействительный API-ключ Gemini. Проверьте ключ в Google AI Studio.');
         }
 
+        if (response.status === 400 && (msg.includes('location is not supported') || msg.includes('FAILED_PRECONDITION'))) {
+          throw new Error('VPN_LOCATION_BLOCKED');
+        }
+
         console.warn(`Model ${model} returned error: ${msg}. Trying next available model...`);
         continue;
       }
@@ -166,7 +170,7 @@ export async function analyzeAdWithGemini(
 
       return parsed as OffenseAnalysis;
     } catch (err: any) {
-      if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('строго запрещена') || err.message?.includes('строго запрещены') || err.message?.includes('отклонён модерацией')) {
+      if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('VPN_LOCATION_BLOCKED') || err.message?.includes('строго запрещена') || err.message?.includes('строго запрещены') || err.message?.includes('отклонён модерацией')) {
         throw err;
       }
       console.warn(`Error on model ${model}:`, err);

@@ -7,9 +7,11 @@ import { Footer } from './components/Footer';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { CookieBanner } from './components/CookieBanner';
 import { PrivacyModal } from './components/PrivacyModal';
+import { VpnWarningModal } from './components/VpnWarningModal';
 import type { OffenseAnalysis, PresetCase } from './types';
 import { analyzeAdWithGemini, getSavedApiKey, hasServerApiKey } from './services/gemini';
 import { checkContentModeration } from './services/moderation';
+import { checkVpnStatus } from './services/vpnCheck';
 import { AlertCircle } from 'lucide-react';
 
 export function App() {
@@ -17,6 +19,8 @@ export function App() {
   const [apiKey, setApiKey] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isVpnModalOpen, setIsVpnModalOpen] = useState(false);
+  const [vpnIncidentId, setVpnIncidentId] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [contextText, setContextText] = useState('');
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
@@ -55,6 +59,21 @@ export function App() {
     updateRoute();
     window.addEventListener('hashchange', updateRoute);
     return () => window.removeEventListener('hashchange', updateRoute);
+  }, []);
+
+  // Fast background check for VPN / Russian IP on load
+  useEffect(() => {
+    const isDismissed = sessionStorage.getItem('vpn_modal_dismissed');
+    if (!isDismissed) {
+      checkVpnStatus().then((result) => {
+        if (result.incidentId) {
+          setVpnIncidentId(result.incidentId);
+        }
+        if (result.isBlocked) {
+          setIsVpnModalOpen(true);
+        }
+      });
+    }
   }, []);
 
   const goToApp = () => {
@@ -154,6 +173,11 @@ export function App() {
       }, 120);
     } catch (error: any) {
       const msg = error?.message || '';
+      if (msg === 'VPN_LOCATION_BLOCKED') {
+        setIsVpnModalOpen(true);
+        setErrorMessage(null);
+        return;
+      }
       if (
         msg.includes('запрещен') ||
         msg.includes('модераци') ||
@@ -279,6 +303,14 @@ export function App() {
       <PrivacyModal
         isOpen={isPrivacyOpen}
         onClose={() => setIsPrivacyOpen(false)}
+      />
+
+      {/* Reverse Ozon-style VPN warning modal */}
+      <VpnWarningModal
+        isOpen={isVpnModalOpen}
+        onClose={() => setIsVpnModalOpen(false)}
+        incidentId={vpnIncidentId}
+        onSuccess={() => setIsVpnModalOpen(false)}
       />
     </div>
   );
