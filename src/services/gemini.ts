@@ -4,10 +4,6 @@ import { checkContentModeration } from './moderation';
 
 export const GEMINI_STORAGE_KEY = 'offended_ai_gemini_key';
 
-export const GEMINI_BASE_URL = (
-  import.meta.env.VITE_GEMINI_BASE_URL || 'https://gemini-proxy.aleksejvinter51.workers.dev'
-).replace(/\/+$/, '');
-
 export function hasServerApiKey(): boolean {
   return !!import.meta.env.VITE_GEMINI_API_KEY;
 }
@@ -27,7 +23,7 @@ export function saveApiKey(key: string): void {
 // Fetch the real list of available models for this specific API key
 async function getSupportedModels(apiKey: string): Promise<string[]> {
   try {
-    const res = await fetch(`${GEMINI_BASE_URL}/v1beta/models?key=${apiKey.trim()}`);
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`);
     if (res.ok) {
       const data = await res.json();
       const models: Array<{ name: string; supportedGenerationMethods?: string[] }> = data.models || [];
@@ -125,7 +121,7 @@ export async function analyzeAdWithGemini(
   const candidateModels = await getSupportedModels(apiKey);
 
   for (const model of candidateModels) {
-    const endpoint = `${GEMINI_BASE_URL}/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
 
     try {
       const response = await fetch(endpoint, {
