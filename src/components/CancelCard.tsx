@@ -222,20 +222,20 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
   return (
     <div className="w-full max-w-[640px] mx-auto my-4 flex flex-col gap-4 animate-fade-in text-[#000000]">
       
-      {/* Top action bar: Pill controls */}
-      <div className="flex items-center justify-between gap-2 px-4 py-2 bg-[#fafafa] border border-[#efefef] rounded-full shadow-[0_0_12px_rgba(0,0,0,0.02)]">
+      {/* Top action bar: Responsive pill controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 sm:py-2 bg-[#fafafa] border border-[#efefef] rounded-[18px] sm:rounded-full shadow-[0_0_12px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#000000] animate-pulse" />
-          <span className="text-[13px] font-semibold text-[#000000]">
+          <span className="w-2 h-2 rounded-full bg-[#000000] animate-pulse shrink-0" />
+          <span className="text-[13px] font-semibold text-[#000000] whitespace-nowrap">
             Пост с вердиктом готов
           </span>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button 
             onClick={handleCopyCardImage}
             disabled={copyingImage}
-            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#ffffff] hover:bg-[#efefef] border border-[#d5d5d5] rounded-full text-xs font-semibold text-[#000000] transition active:scale-95 disabled:opacity-60 whitespace-nowrap"
+            className="flex-1 sm:flex-initial cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#ffffff] hover:bg-[#efefef] border border-[#d5d5d5] rounded-full text-xs font-semibold text-[#000000] transition active:scale-95 disabled:opacity-60 whitespace-nowrap h-[34px]"
             title="Скопировать картинку треда в буфер обмена"
           >
             {copyingImage ? (
@@ -251,7 +251,7 @@ export function CancelCard({ analysis, imageSrc, onReset }: CancelCardProps) {
           <button 
             onClick={handleDownloadPng}
             disabled={downloading}
-            className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#000000] hover:bg-[#222222] text-[#fafafa] rounded-full text-xs font-semibold transition active:scale-95 whitespace-nowrap"
+            className="flex-1 sm:flex-initial cursor-pointer inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-[#000000] hover:bg-[#222222] text-[#fafafa] rounded-full text-xs font-semibold transition active:scale-95 whitespace-nowrap h-[34px]"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{downloading ? 'Экспорт...' : 'Скачать PNG'}</span>
